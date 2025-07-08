@@ -1,4 +1,3 @@
-import 'package:dailywellness_app/screens/home.dart';
 import 'package:flutter/material.dart';
 import 'package:dailywellness_app/routes/routes.dart';
 
@@ -16,6 +15,8 @@ class MyApp extends StatelessWidget {
       title: 'DailyWellness',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
+      initialRoute:
+          AppRoutes.initial, // Use the initial route defined in AppRoutes
       routes: AppRoutes.routes, // Use the routes defined in AppRoutes
     );
   }
