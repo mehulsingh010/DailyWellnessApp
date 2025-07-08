@@ -1,8 +1,11 @@
-import 'package:dailywellness_app/constants/colors.dart';
-import 'package:dailywellness_app/models/quote.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
+import '../provider/task_provider.dart';
+import '../services/quote_service.dart';
+import '../models/quote.dart';
+import '../widgets/task_item.dart';
+import '../constants/colors.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -12,95 +15,198 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  List<String> tasks = ['Drink water', 'Meditate', 'Walk'];
-  late Future<Quote> quoteFuture;
+  late Future<Quote> _quoteFuture;
 
   @override
   void initState() {
     super.initState();
-    quoteFuture = fetchQuote();
+    _quoteFuture = QuoteService.fetchQuote();
   }
 
-  static Future<Quote> fetchQuote() async {
-    try {
-      final url = Uri.parse("https://favqs.com/api/qotd");
-      final response = await http
-          .get(
-            url,
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-          )
-          .timeout(const Duration(seconds: 10));
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return Quote(
-          body: data['quote']['body'] ?? 'Stay positive and keep going!',
-          author: data['quote']['author'] ?? 'Unknown',
-        );
-      } else {
-        throw Exception('HTTP Error: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error fetching quote: $e');
-      // Always return a fallback Quote if an error occurs
-      return Quote(body: 'Stay positive and keep going!', author: 'Unknown');
-    }
+  void _refreshQuote() {
+    setState(() {
+      _quoteFuture = QuoteService.fetchQuote();
+    });
   }
 
-  void addCustomTask() {
-    TextEditingController controller = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Activity'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(hintText: 'Enter activity'),
+  @override
+  Widget build(BuildContext context) {
+    final taskProvider = Provider.of<TaskProvider>(context);
+    final currentDate = DateFormat('EEEE, MMMM d, yyyy').format(DateTime.now());
+    final currentTime = DateFormat('HH:mm').format(DateTime.now());
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Dashboard',
+          style: TextStyle(fontWeight: FontWeight.w600),
         ),
         actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text('Cancel'),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _refreshQuote,
+            tooltip: 'Refresh Quote',
           ),
-          ElevatedButton(
-            onPressed: () {
-              if (controller.text.trim().isNotEmpty) {
-                setState(() {
-                  tasks.add(controller.text.trim());
-                });
-                Navigator.pop(context);
-              }
+        ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(color: tdBlue),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.spa, size: 40, color: Colors.white),
+                  SizedBox(height: 8),
+                  Text(
+                    'DailyWellness',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    'Personal Wellness Tracker',
+                    style: TextStyle(color: Colors.white70, fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Logout'),
+              onTap: () {
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/login',
+                  (route) => false,
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+      body: OrientationBuilder(
+        builder: (context, orientation) {
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final isLandscape = orientation == Orientation.landscape;
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Greeting Section
+                    _buildGreetingSection(currentDate, currentTime),
+                    const SizedBox(height: 24),
+
+                    if (isLandscape) ...[
+                      // Landscape layout - side by side
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            flex: 1,
+                            child: _buildTasksSection(taskProvider),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(flex: 1, child: _buildQuoteSection()),
+                        ],
+                      ),
+                    ] else ...[
+                      // Portrait layout - stacked
+                      _buildTasksSection(taskProvider),
+                      const SizedBox(height: 24),
+                      _buildQuoteSection(),
+                    ],
+                  ],
+                ),
+              );
             },
-            child: const Text('Add'),
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/add-activity');
+        },
+        backgroundColor: tdBlue,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
+    );
+  }
+
+  Widget _buildGreetingSection(String date, String time) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [tdBlue.withOpacity(0.1), Colors.teal.withOpacity(0.1)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Hello, Mehul! 👋',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: tdBlack,
+            ),
           ),
+          const SizedBox(height: 8),
+          Text(date, style: TextStyle(fontSize: 16, color: tdGrey)),
+          Text(time, style: TextStyle(fontSize: 14, color: tdGrey)),
         ],
       ),
     );
   }
 
-  AppBar _buildAppBar() {
-    return AppBar(
-      elevation: 0,
-      backgroundColor: tdBGColor,
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Text('Dashboard', style: TextStyle(fontSize: 20)),
-          SizedBox(
-            height: 40,
-            width: 40,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: Image.asset('assets/images/avatar.jpg'),
+  Widget _buildTasksSection(TaskProvider taskProvider) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Your Wellness Tasks',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+            ),
+            Text(
+              '${taskProvider.completedTasksCount}/${taskProvider.tasks.length}',
+              style: TextStyle(fontSize: 14, color: tdGrey),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (taskProvider.tasks.isEmpty)
+          const Card(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Text(
+                'No tasks yet. Add your first wellness activity!',
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+          )
+        else
+          ...taskProvider.tasks.map(
+            (task) => TaskItem(
+              task: task,
+              onToggle: () => taskProvider.toggleTask(task.id),
+              onDelete: () => taskProvider.removeTask(task.id),
             ),
           ),
-        ],
-      ),
+      ],
     );
   }
 
@@ -109,7 +215,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Motivational Quote',
+          'Daily Motivation',
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
@@ -122,7 +228,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             border: Border.all(color: Colors.teal.withOpacity(0.2)),
           ),
           child: FutureBuilder<Quote>(
-            future: quoteFuture,
+            future: _quoteFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
@@ -136,25 +242,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   children: [
                     const Icon(Icons.error_outline, color: Colors.red),
                     const SizedBox(height: 8),
-                    Text(
-                      "Could not load quote: ${snapshot.error}",
-                      style: const TextStyle(color: Colors.red),
-                      textAlign: TextAlign.center,
+                    const Text(
+                      'Failed to load quote',
+                      style: TextStyle(color: Colors.red),
                     ),
                     const SizedBox(height: 8),
                     ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          quoteFuture = fetchQuote();
-                        });
-                      },
+                      onPressed: _refreshQuote,
                       child: const Text('Retry'),
                     ),
                   ],
                 );
-              } else if (!snapshot.hasData) {
-                return const Text("No quote available.");
-              } else {
+              } else if (snapshot.hasData) {
                 final quote = snapshot.data!;
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,99 +263,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       style: const TextStyle(
                         fontStyle: FontStyle.italic,
                         fontSize: 16,
+                        height: 1.4,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        '- ${quote.author}',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.black54,
-                          fontWeight: FontWeight.w500,
-                        ),
+                    const SizedBox(height: 12),
+                    Text(
+                      '- ${quote.author}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.black54,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
                 );
+              } else {
+                return const Text('No quote available');
               }
             },
           ),
         ),
       ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final String formattedDate =
-        "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}";
-
-    return Scaffold(
-      appBar: _buildAppBar(),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              child: Text('Dashboard Menu', style: TextStyle(fontSize: 24)),
-            ),
-            ListTile(
-              title: const Text('Logout'),
-              onTap: () {
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  '/login',
-                  (route) => false,
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            Text(
-              'Hello, Mehul! 👋',
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              formattedDate,
-              style: const TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Your Wellness Tasks',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            ...tasks.map(
-              (task) => Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: ListTile(
-                  leading: const Icon(Icons.check_circle_outline),
-                  title: Text(task),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            _buildQuoteSection(),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: tdBlue,
-        onPressed: addCustomTask,
-        tooltip: 'Add Activity',
-        child: const Icon(Icons.add),
-      ),
     );
   }
 }
