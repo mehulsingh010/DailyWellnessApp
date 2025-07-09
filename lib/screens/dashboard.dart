@@ -1,4 +1,5 @@
 import 'package:dailywellness_app/routes/routes.dart';
+import 'package:dailywellness_app/utils/task_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -183,6 +184,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
               style: TextStyle(fontSize: 14, color: tdGrey),
             ),
           ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          TaskUtils.formatTaskCount(taskProvider.completedTasksCount),
+          style: TextStyle(fontSize: 14, color: tdGrey),
         ),
         const SizedBox(height: 8),
         if (taskProvider.tasks.isEmpty)
