@@ -8,13 +8,7 @@ class QuoteService {
   static Future<Quote> fetchQuote() async {
     try {
       final response = await http
-          .get(
-            Uri.parse(baseUrl),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-          )
+          .get(Uri.parse(baseUrl))
           .timeout(const Duration(seconds: 15));
 
       if (response.statusCode == 200) {
@@ -37,3 +31,19 @@ class QuoteService {
     }
   }
 }
+
+// class QuoteService {
+//   static Future<String> fetchQuote() async {
+//     final url = Uri.parse('https://favqs.com/api/qotd');
+
+//     final response = await http.get(url);
+//     if (response.statusCode == 200) {
+//       final json = jsonDecode(response.body);
+//       final quote = json['quote']['body'];
+//       final author = json['quote']['author'];
+//       return '"$quote"\n— $author';
+//     } else {
+//       throw Exception('Failed to load quote');
+//     }
+//   }
+// }

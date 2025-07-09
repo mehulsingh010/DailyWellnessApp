@@ -1,3 +1,4 @@
+import 'package:dailywellness_app/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -41,13 +42,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           'Dashboard',
           style: TextStyle(fontWeight: FontWeight.w600),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _refreshQuote,
-            tooltip: 'Refresh Quote',
-          ),
-        ],
       ),
       drawer: Drawer(
         child: ListView(
@@ -81,7 +75,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               onTap: () {
                 Navigator.pushNamedAndRemoveUntil(
                   context,
-                  '/login',
+                  AppRoutes.login,
                   (route) => false,
                 );
               },
@@ -145,7 +139,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [tdBlue.withOpacity(0.1), Colors.teal.withOpacity(0.1)],
+          colors: [
+            tdBlue.withValues(alpha: 0.5),
+            Colors.teal.withValues(alpha: 0.5),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -214,9 +211,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Daily Motivation',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Daily Motivation',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+            ),
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: _refreshQuote,
+              tooltip: 'Refresh Quote',
+            ),
+          ],
         ),
         const SizedBox(height: 8),
         Container(
@@ -225,7 +232,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           decoration: BoxDecoration(
             color: Colors.teal[50],
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.teal.withOpacity(0.2)),
+            border: Border.all(color: Colors.teal, width: 1.5),
           ),
           child: FutureBuilder<Quote>(
             future: _quoteFuture,
@@ -257,6 +264,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 final quote = snapshot.data!;
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+
                   children: [
                     Text(
                       '"${quote.body}"',
