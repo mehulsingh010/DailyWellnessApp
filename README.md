@@ -4,7 +4,27 @@ A new Flutter project.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+DailyWellness - Personal Wellness Tracker App
+
+Project Overview
+DailyWellness is a Flutter mobile application designed to help users track their daily wellness activities and stay motivated with inspirational quotes. The app focuses on personal wellness management with a clean, user-friendly interface.
+App Purpose
+Help users maintain a healthy lifestyle by:
+Tracking daily wellness activities (hydration, meditation, exercise)
+Providing motivational quotes to inspire daily wellness
+Creating a personalized wellness dashboard
+Adding custom wellness activities
+Core Features:
+Simple login with validation
+Dashboard with wellness tasks
+Custom activity addition
+Daily motivational quotes via API
+
+Technical Stack:
+Flutter 3.x with Dart
+HTTP for API calls
+Provider for state management
+Material Design UI
 
 A few resources to get you started if this is your first Flutter project:
 
