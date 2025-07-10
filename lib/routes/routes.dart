@@ -1,6 +1,7 @@
 import 'package:dailywellness_app/screens/activity.dart';
 import 'package:dailywellness_app/screens/dashboard.dart';
 import 'package:dailywellness_app/screens/login.dart';
+import 'package:dailywellness_app/screens/splash.dart';
 import 'package:flutter/material.dart';
 
 class AppRoutes {
@@ -10,7 +11,7 @@ class AppRoutes {
   static const String addActivity = '/add-activity';
 
   static final Map<String, WidgetBuilder> routes = {
-    initial: (context) => const LoginScreen(),
+    initial: (context) => const SplashScreen(),
     login: (context) => const LoginScreen(),
     dashboard: (context) => const DashboardScreen(),
     addActivity: (context) => const AddActivityScreen(),

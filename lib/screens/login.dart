@@ -1,4 +1,5 @@
 import 'package:dailywellness_app/routes/routes.dart';
+import 'package:dailywellness_app/utils/user_preferences.dart';
 import 'package:flutter/material.dart';
 import '../widgets/custom_button.dart';
 import '../constants/colors.dart';
@@ -24,21 +25,21 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _handleLogin() async {
+  void _handleLogin(BuildContext context) async {
     if (_formKey.currentState?.validate() ?? false) {
       setState(() {
         _isLoading = true;
       });
+      String email = _emailController.text;
 
-      // Simulate API call delay
-      await Future.delayed(const Duration(seconds: 2));
+      await UserPreferences.saveEmail(email);
 
       setState(() {
         _isLoading = false;
       });
 
       // Navigate to dashboard
-      if (!mounted) return; // Check if the widget is still mounted
+      if (!context.mounted) return; // Check if the widget is still mounted
       Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
     }
   }
@@ -124,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             const SizedBox(height: 24),
                             CustomButton(
                               text: 'Login',
-                              onPressed: _handleLogin,
+                              onPressed: () => _handleLogin(context),
                               isLoading: _isLoading,
                             ),
                           ],

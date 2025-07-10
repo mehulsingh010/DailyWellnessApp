@@ -1,5 +1,6 @@
 import 'package:dailywellness_app/routes/routes.dart';
 import 'package:dailywellness_app/utils/task_utils.dart';
+import 'package:dailywellness_app/utils/user_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -18,11 +19,26 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   late Future<Quote> _quoteFuture;
+  String? userEmail;
 
   @override
   void initState() {
     super.initState();
+    _loadEmail();
     _quoteFuture = QuoteService.fetchQuote();
+  }
+
+  Future<void> _loadEmail() async {
+    String? email = await UserPreferences.getEmail();
+    setState(() {
+      userEmail = email;
+    });
+  }
+
+  void _logout(BuildContext context) async {
+    await UserPreferences.clearEmail();
+    if (!context.mounted) return;
+    Navigator.pushReplacementNamed(context, AppRoutes.login);
   }
 
   void _refreshQuote() {
@@ -48,7 +64,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            const DrawerHeader(
+            DrawerHeader(
               decoration: BoxDecoration(color: tdBlue),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,19 +83,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     'Personal Wellness Tracker',
                     style: TextStyle(color: Colors.white70, fontSize: 14),
                   ),
+                  SizedBox(height: 8),
+                  Text(
+                    "Welcome ,${userEmail?.trim().split('@')[0] ?? 'User'}",
+                    style: TextStyle(color: Colors.white70, fontSize: 16),
+                  ),
                 ],
               ),
             ),
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text('Logout'),
-              onTap: () {
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  AppRoutes.login,
-                  (route) => false,
-                );
-              },
+              onTap: () => _logout(context),
             ),
           ],
         ),
@@ -152,15 +167,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Hello, Users! 👋',
+          Text(
+            'Hello, ${userEmail?.trim().split('@')[0] ?? 'User'}! 👋',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: tdBlack,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Text(date, style: TextStyle(fontSize: 16, color: tdGrey)),
           Text(time, style: TextStyle(fontSize: 14, color: tdGrey)),
         ],
