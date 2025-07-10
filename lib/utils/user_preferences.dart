@@ -9,7 +9,7 @@ class UserPreferences {
   static Future<String?> getEmail() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('email');
-  }har
+  }
 
   static Future<void> clearEmail() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
