@@ -126,7 +126,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/add-activity');
+          Navigator.pushNamed(context, AppRoutes.addActivity);
         },
         backgroundColor: tdBlue,
         child: const Icon(Icons.add, color: Colors.white),
@@ -153,7 +153,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Hello, Mehul! 👋',
+            'Hello, Users! 👋',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,

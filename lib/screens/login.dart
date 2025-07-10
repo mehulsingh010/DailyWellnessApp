@@ -1,3 +1,4 @@
+import 'package:dailywellness_app/routes/routes.dart';
 import 'package:flutter/material.dart';
 import '../widgets/custom_button.dart';
 import '../constants/colors.dart';
@@ -38,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       // Navigate to dashboard
       if (!mounted) return; // Check if the widget is still mounted
-      Navigator.pushReplacementNamed(context, '/dashboard');
+      Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
     }
   }
 

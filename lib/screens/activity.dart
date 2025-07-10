@@ -43,6 +43,7 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
         _isLoading = false;
       });
 
+      if (!mounted) return;
       Navigator.pop(context);
     }
   }
