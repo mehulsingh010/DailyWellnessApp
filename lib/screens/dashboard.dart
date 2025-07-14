@@ -47,6 +47,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
+  Future<void> _showLogoutDialog(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm logout'),
+          content: const SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[Text('Are you sure you want to logout?')],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); //close dialog
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, // Logout button color
+              ),
+              onPressed: () {
+                Navigator.of(context).pop(); //close dialog
+                _logout(context);
+              },
+              child: const Text('Logout'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final taskProvider = Provider.of<TaskProvider>(context);
@@ -94,7 +129,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text('Logout'),
-              onTap: () => _logout(context),
+              onTap: () => _showLogoutDialog(context),
             ),
           ],
         ),

@@ -32,7 +32,7 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
 
       // Simulate save delay
       await Future.delayed(const Duration(milliseconds: 500));
-
+      if (!mounted) return;
       final taskProvider = Provider.of<TaskProvider>(context, listen: false);
       taskProvider.addTask(
         _nameController.text.trim(),
